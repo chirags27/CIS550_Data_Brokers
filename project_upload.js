@@ -2,12 +2,12 @@ var AWS = require('aws-sdk');
 
 var s3 = new AWS.S3(); 
 
-AWS.config.update(
-  {
-    accessKeyId: "AKIAIRZG7PNLRNL3K4MA",
-    secretAccessKey: "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",
-  }
-);
+// AWS.config.update(
+//   {
+//     accessKeyId: "AKIAIRZG7PNLRNL3K4MA",
+//     secretAccessKey: "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",
+//   }
+// );
 
 
 //  s3.createBucket({Bucket: 'databucketcis550'}, function() {
@@ -26,8 +26,10 @@ AWS.config.update(
 
 // });
 
+
+
 s3.getObject(
-  { Bucket: "databucketcis550", Key: "Resume_Chirag_M_Shah.pdf" },
+  { Bucket: "databucketcis550", Key: "myKey.txt" },
   function (err, data) {
     if (err != null) {
       console.log(err);
