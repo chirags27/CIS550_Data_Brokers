@@ -1,6 +1,9 @@
 var AWS = require('aws-sdk'); 
+var fs = require('fs');
 
-var s3 = new AWS.S3(); 
+ var s3 = new AWS.S3(); 
+
+
 
 // AWS.config.update(
 //   {
@@ -28,8 +31,27 @@ var s3 = new AWS.S3();
 
 
 
+// Read in the file, convert it to base64, store to S3
+var filename = 'hello.txt';
+
+fs.readFile(filename.toString(), function (err, data) {
+  if (err) { throw err; }
+
+
+
+  var s3 = new AWS.S3();
+  s3.putObject({
+    Bucket: 'databucketcis550',
+    Key: filename.toString(),
+    Body: data
+  }, function (err) {
+    if (err) { throw err; }
+  });
+
+});
+
 s3.getObject(
-  { Bucket: "databucketcis550", Key: "myKey.txt" },
+  { Bucket: "databucketcis550", Key: filename.toString()},
   function (err, data) {
     if (err != null) {
       console.log(err);
