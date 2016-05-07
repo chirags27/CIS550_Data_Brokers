@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>DataBrokers Login</title>  
+        <!-- CSS stylesheet file -->
+        <link rel="stylesheet" href="assets/css/styles.css" />
+		<link rel="stylesheet" type="text/css" href="assets/css/jquery-ui.css" />
+		<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+		<!-- JavaScript includes -->
+		<script src="assets/js/script.js"></script>
+		<script src="assets/js/jquery-1.12.3.min.js"></script>
+		<script src="assets/js/jquery-ui/jquery-ui.js"></script>
+
+	</head>
+    <body>
+		<div id="formContainer">
+			<form id="login" method="post" >
+				<a href="#" id="flipTosignUp" class="flipLink">SignUp?</a>
+				<input class="login-email-box" type="text" name="loginEmail" id="loginEmail" value="Email" onfocus="if(this.value == 'Email') {this.value=''}" onblur="if(this.value == ''){this.value ='Email'}" />
+				<input class="login-password-box" type="password" name="loginPass" id="loginPass" value="pass" onfocus="if(this.value == 'pass') {this.value=''}" onblur="if(this.value == ''){this.value ='pass'}" />
+				<label class="error-label" id="error-label"> </label>
+				<input type="submit" name="submit" class="submit-login-button" id="submit-login-button" value="Login" />
+				<!-- <input type="button" id="submit-query-button" class="submit-query-button" onclick="onQueryFormSubmit()" value="Search" /> -->
+			</form>
+			<form id="signUp" method="post" >
+				<a href="#" id="flipToLogin" class="flipLink">SignUp?</a>
+				<input class="signup-name-box" type="text" name="signUpNam" id="signUpNam" value="Name" onfocus="if(this.value == 'Name') {this.value=''}" onblur="if(this.value == ''){this.value ='Name'}" />
+				<input class="signup-email-box" type="text" name="signUpEmail" id="signUpEmail" value="Email" onfocus="if(this.value == 'Email') {this.value=''}" onblur="if(this.value == ''){this.value ='Email'}" />
+				<input class="signup-age-box" type="text" name="signUpAge" id="signUpAge" value="Age" onfocus="if(this.value == 'Age') {this.value=''}" onblur="if(this.value == ''){this.value ='Age'}" />
+				<input class="signup-password-box" type="password" name="signUpPassword" id="signUpPassword" value="Password" onfocus="if(this.value == 'Password') {this.value=''}" onblur="if(this.value == ''){this.value ='Password'}" />
+				<input type="submit" name="submit" class="submit-signup-button" id="submit-signup-button" value="SignUp" />
+			</form>
+		</div>
+		<div>
+			alert("Hello");
+		</div>
+        <footer>
+	        <h2><i>CIS-550</i> Project on DataLake Management System</h2>
+        </footer>
+    </body>
+</html>
+
