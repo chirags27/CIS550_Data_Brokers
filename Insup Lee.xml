@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<resume>
+	<first_name> Insup </first_name>
+	<last_name> Lee </last_name>
+	<position> Professor </position>
+	<university1> University of Pennsylvania </university1>
+	<university2> University of Wisconsin Madison </university2>
+	<department> Computer and Information Sciences </department>
+	<course1> CIS 541 </course1>
+	<course2> CSE 400 </course2>
+	<primary> Cyber Physical Systems </primary>
+	<secondary> Embedded Systems </secondary>
+	<association> Medical </association>
+</resume>
+

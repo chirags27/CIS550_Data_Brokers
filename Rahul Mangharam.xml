@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<resume>
+	<first_name> Rahul </first_name>
+	<last_name> Mangharam </last_name>
+	<position> Professor </position>
+	<university1> University of Pennsylvania </university1>
+	<university2> Carnegie Mellon University </university2>
+	<department> Embedded Systems </department>
+	<course1> ESE 350 </course1>
+	<course2> ESE 519 </course2>
+	<lab1> mLab </lab1>
+	<lab2> xLab </lab2>
+	<primary> Real time Systems </primary>
+	<secondary> Sensor Networks </secondary>
+	<association> Comcast </association>
+</resume>
+

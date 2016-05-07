@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<resume>
+	<first_name> Boon </first_name>
+	<last_name> Thau Loo </last_name>
+	<position> Professor </position>
+	<university1> University of Pennsylvania </university1>
+	<university2> University of California at Berkeley </university2>
+	<department> Computer and Information Sciences </department>
+	<course1> CIS 380 </course1>
+	<course2> CIS 505 </course2>
+	<course3> CIS 800 </course3>
+	<primary> Distributed Systems </primary>
+	<secondary> Networked Systems </secondary>
+	<association> Juniper Networks </association>
+	<project> NetDB </project>
+</resume>
+

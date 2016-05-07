@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<resume>
+	<first_name> Vijay </first_name>
+	<last_name> Kumar </last_name>
+	<position> Professor </position>
+	<university1> University of Pennsylvania </university1>
+	<university2> The Ohio State University </university2>
+	<department> Mechanical Engineering and Applied Mechanics </department>
+	<course1> MEAM 513 </course1>
+	<course2> MEAM 520 </course2>
+	<course3> MEAM 535 </course3>
+	<course4> MEAM 528 </course4>
+	<course5> MEAM 620 </course5>
+	<lab1> GRASP </lab1>
+	<primary> Robotics </primary>
+	<secondary> Dynamics </secondary>
+	<association> DARPA </association>
+	<project> SWARMS </project>
+</resume>
+
