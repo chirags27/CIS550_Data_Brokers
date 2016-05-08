@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<courses>
+	<Kostas> MEAM_580 </Kostas>
+	<Zachary> CIS_555 </Zachary>
+	<Boon> CIS_505 </Boon>
+	<Zachary> CIS_550 </Zachary>
+	<Vijay> MEAM_520 </Vijay>
+	<Insup> CIS_541 </Insup>
+	<Vijay> MEAM_620 </Vijay>
+	<Kostas> MEAM_620 </Kostas>
+	<Rahul> ESE_519 </Rahul>
+	<Lyle> CIS_520 </Lyle>
+	<Rahul> ESE_350 </Rahul>
+</courses>
