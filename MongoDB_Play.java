@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -398,6 +399,38 @@ public class MongoDB_Play {
 			// Do nothing
 		}
 	}
+	
+	ArrayList<String> getNeighBoursOf(int node)
+	{
+		MongoClient mongoClient;
+		try {
+			MongoDB_Play md = new MongoDB_Play();
+			ArrayList<String> toSend  = new ArrayList<>();
+			mongoClient = new MongoClient( "localhost" , 27017 );
+			// Now connect to your databases
+	        DB db = mongoClient.getDB( "test" );
+	        //System.out.println("Connect to database successfully")
+	        BasicDBObject document = new BasicDBObject();
+	        DBCollection collection = db.getCollection("linker_table");
+	        DBCursor cursor = collection.find(new BasicDBObject("n1",node));
+	        int neigh_count = 0;
+	        while(neigh_count<5 && cursor.hasNext())
+	        {
+	        	DBObject o_temp1 = cursor.next();
+	            int node2 = (int) o_temp1.get("n2");
+	            toSend.add(Integer.toString(node2) );
+	            neigh_count++;
+	        }
+	        return toSend;
+	        
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			return null;
+			//e.printStackTrace();
+		}
+        
+	}
+	
 //	
 	public static void main(String args[]) throws UnknownHostException
 	{
@@ -414,18 +447,26 @@ public class MongoDB_Play {
 ////		m.mongo_store(10, "samarth", "pandey", 3, "name", "type");
 //		m.make_linker();
 		TreeMap<Integer,ArrayList<String>> tm = new TreeMap<>();
-		if(args.length == 1)
+		String permission = "root";
+		if(args.length == 2) // for 1 word query -- word permission
 		{
 			m.resolveQuery(args[0]);
+			permission = args[1];
+			
 		}
-		else if(args.length == 2)
+		else if(args.length == 3) // for 2 word query -- word word word_permission
 		{
 			m.resolveQuery(args[0]+" "+args[1]);
+			permission = args[2];
 		}
 		
-		//m.resolveQuery("Stanford Boon");
+		m.resolveQuery("Stanford Boon");
 		
-		ArrayList<ArrayList<String>> final_doc_connections = new ArrayList<>();
+	//	String user_email_id = args[2];
+		
+		
+		
+		//ArrayList<ArrayList<String>> final_doc_connections = new ArrayList<>();
 		
 		ArrayList<String> doc_single_conn = new ArrayList<>();
 		
@@ -447,14 +488,48 @@ public class MongoDB_Play {
 					path_len++;
 				}
 				//System.out.println(list_docs.toString());
-				tm.put(path_len, list_docs);
-				final_doc_connections.add(list_docs);
-				list_docs = new ArrayList<>();
 				
+				// put into the tree map according to the permissions
+				if(permission.equals("root"))
+				{	
+				tm.put(path_len, list_docs);
+				//final_doc_connections.add(list_docs);
+				list_docs = new ArrayList<>();
+				}
+				else
+				{
+					boolean add_flag = true;
+					// only add this if the path does not contain any pdf and csv
+					for(String filter: list_docs)
+					{
+						//System.out.println(filter + "-- > " + filter.contains("."));
+						if(filter.contains(".") == false) // Implies professors and 
+						{
+							add_flag = false;
+							break;
+						}
+					}
+					//System.out.println("Done");
+					if(add_flag == true)   // Only add to this if the the user is permitted to view stuff
+					{
+						tm.put(path_len, list_docs);
+						//final_doc_connections.add(list_docs);
+						//list_docs = new ArrayList<>();
+					}
+					list_docs = new ArrayList<>();
+					
+				}
 			}
 			
 			//print the paths in sorted order
+			LinkedHashMap<String, ArrayList<String>> toSendDraw = new LinkedHashMap<>();
 			int show_count = 0;
+			
+			if(tm.keySet().size() == 0)
+			{
+				System.out.println("No relevant data found -- Increase permission level");
+			}
+			
 			for(Integer i: tm.keySet() )
 			{
 				if(show_count == 6)
@@ -462,6 +537,18 @@ public class MongoDB_Play {
 				{
 					break;
 				}
+				ArrayList<String> temp_list_fp = tm.get(i);
+				
+				for(String i_i : temp_list_fp )
+				{
+					//System.out.println(i_i);
+					String spl[] = i_i.split("_");
+					int node_id_forn = Integer.parseInt(spl[1]);
+					toSendDraw.put(i_i, m.getNeighBoursOf(node_id_forn)) ;
+				}
+				// Send this to Prahladh's draw function
+				
+				
 				System.out.println(tm.get(i));
 				show_count++;
 			}
