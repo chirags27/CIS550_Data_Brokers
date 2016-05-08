@@ -4,11 +4,11 @@ var ObjectId = require('mongodb').ObjectID;
 var urlDb = 'mongodb://localhost:27017/test';
 
 //mongoimport --db test --collection user_data --drop --file user_dataset.json
-id = "1"
+/* id = "1"
 name = "Chirag"
 password ="databrokers"
 gender = "M"
-email = "chiragshah271093@gmail.com" 
+email = "chiragshah271093@gmail.com"  */
 var body = '';
 var searchPage;
 var htmlFile;
@@ -19,6 +19,19 @@ var http = require('http'),
    exp = require('express'),
    qs = require('querystring');
 
+fs.readFile('./dataBrokers.html', function(err, data) {
+    if (err){
+        throw err;
+    }
+    htmlFile = data;
+});
+
+fs.readFile('./search.html', function(err, data) {
+    if (err){
+        throw err;
+    }
+    searchPage = data;
+});
 var insertUserDetails = function(db, name,email, age, password,callback) 
 {
    
@@ -34,43 +47,39 @@ var insertUserDetails = function(db, name,email, age, password,callback)
 };
 
 var findUserDetails = function(db, email, password, response, callback) {
-   var cursor = db.collection('user_data').find( { "_id" : email, "password" : password } );
-   cursor.each(function(err, doc) {
+	var cursor = db.collection('user_data').find( { "_id" : email, "password" : password } );
+	var iter = 0;
+	cursor.each(function(err, doc) {
+		
       //assert.equal(err, null);
-		if (doc != null) {
-			//console.dir(doc);
-			console.log("Email ID:  " + doc._id);
-			console.log("Name: " + doc.name);
-			response.writeHeader(200, {"Content-Type": "text/html"});
-			response.write(searchPage);
-			response.end();
-			console.log("****************** SUCCESSFULLY LOGGED IN ************************");
-			callback();
-		} 
-		else {
-			console.log("user does not exists");
-			response.writeHeader(200, {"Content-Type": "text/html"});
-			response.write(htmlFile);
-			response.end();
-			console.log("****************** COULD NOT SUCCESSFULLY LOG IN ************************");
-			callback();
+		if(iter == 0) 
+		{
+			
+			
+			if (doc != null) 
+			{
+				console.log("User with credentials: " + email + " and " + password + " has successfully registered");
+				iter++;
+				//console.dir(doc);
+				response.writeHeader(200, {"Content-Type": "text/html"});
+				response.write(searchPage);
+				response.end();
+				console.log("****************** SUCCESSFULLY LOGGED IN ************************");
+				callback();
+			} 
+			else 
+			{
+				iter++;
+				console.log("user with credentials "  + email + " and " + password + " does not exists");
+				response.writeHeader(200, {"Content-Type": "text/html"});
+				response.write(htmlFile);
+				response.end();
+				console.log("****************** COULD NOT SUCCESSFULLY LOG IN ************************");
+				callback();
+			}
 		}
    });
 };
-
-fs.readFile('./dataBrokers.html', function(err, data) {
-    if (err){
-        throw err;
-    }
-    htmlFile = data;
-});
-
-fs.readFile('./search.html', function(err, data) {
-    if (err){
-        throw err;
-    }
-    searchPage = data;
-});
 
 
 	console.log("************** SERVER STARTED ************ ");
@@ -82,7 +91,8 @@ fs.readFile('./search.html', function(err, data) {
 
         if(request.method == 'POST')
         {
-			console.log("inside");
+			console.log("inside post for: " + myPath);
+			body = "";
             request.on('data', function (data) {
                 body +=data;
 				body.trim();
@@ -121,9 +131,10 @@ fs.readFile('./search.html', function(err, data) {
 				}
 				else if(typeOfCall == 'Login') {
 					
+					console.log("Body: " + body);
 					console.log("****************** LOGGING IN ************************");
-					var userEnteredEmail = credentials.signUpEmail;
-					var userEnteredPassword = credentials.signUpPassword;
+					var userEnteredEmail = credentials.loginEmail;
+					var userEnteredPassword = credentials.loginPass;
 					
 					console.log("************** AUTHENTICATING ****************");
 					// check into db whether the user exists or not
@@ -137,6 +148,7 @@ fs.readFile('./search.html', function(err, data) {
 				}
 				else 
 				{
+					console.log("Body: " + body);
 					console.log(typeOfCall);
 					console.log("pppppppppppppppp");
 					response.end();
@@ -146,8 +158,8 @@ fs.readFile('./search.html', function(err, data) {
         }
         else 
 		{	
-			console.log(request.method);
-			console.log(myPath);
+			/* console.log(request.method);
+			console.log(myPath); */
 			if(myPath == '/favicon.ico')
 			{
 				// response.writeHeader(200, {"Content-Type": "text/html"});
