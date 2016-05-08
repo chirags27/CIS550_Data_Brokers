@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
+import java.util.TreeMap;
 
 
 public class MongoDB_Play {
@@ -16,6 +17,7 @@ public class MongoDB_Play {
 	
 	static HashMap<Integer,ArrayList<Integer>> linker = new HashMap<Integer,ArrayList<Integer>>();
 	static ArrayList<ArrayList<Integer>> final_paths_ret = new ArrayList<>();
+	static ArrayList<ArrayList<Integer>> final_single = new ArrayList<>();
 	void mongo_store(int node_id, String key, String value, int parent_id, String doc_name, String type )
 	{
 		try{
@@ -33,6 +35,8 @@ public class MongoDB_Play {
 	         document.put("type", type);
 	         
 	         db.getCollection("ext_table").insert(document);
+	         mongo_inv_store(key, node_id);
+	         mongo_inv_store(value, node_id);
 	         System.out.println("Done");
 				
 	      }catch(Exception e){
@@ -44,7 +48,7 @@ public class MongoDB_Play {
 	}
 	
 	// store the index of nodes to node ID's
-	void mongo_inv_store(String key, int value)
+	static void mongo_inv_store(String key, int value)
 	{
 		try{
 	         // To connect to mongodb server
@@ -192,7 +196,9 @@ public class MongoDB_Play {
 			if(destination == source)
 			{
 				//path.add(destination);
-				final_paths_ret.add(path);
+				//System.out.println(path.toString());
+				ArrayList<Integer> temp_list = new ArrayList<>(path);
+				final_paths_ret.add(temp_list);
 				return;
 			}
 
@@ -254,6 +260,8 @@ public class MongoDB_Play {
 		        	ArrayList<Integer> path_single = new ArrayList<Integer>();
 		        	for(int temp = 0; temp< final_results.length; temp++)
 		        		path_single.add(Integer.parseInt(final_results[temp]));
+		        	
+		        	final_single.add(path_single);
 //		        	final_paths_ret.add(path_single);
 //		        	return final_paths_ret;	
 		        	//System.out.println("Node ID's obtained");
@@ -302,8 +310,8 @@ public class MongoDB_Play {
 		
 		        	int n1 =Integer.parseInt(final_nodeids1[0]);
 		        	int n2 =Integer.parseInt(final_nodeids2[0]);
-		        	System.out.println("n1:" + n1 );
-		        	System.out.println("n2:" + n2 );
+//		        	System.out.println("n1:" + n1 );
+//		        	System.out.println("n2:" + n2 );
 		        	ArrayList<Integer> alreadyVisited = new ArrayList<Integer>();
 		        	ArrayList<Integer> path = new ArrayList<Integer>();
 		        	Queue<Integer> visit = new Queue<Integer>();
@@ -311,20 +319,16 @@ public class MongoDB_Play {
 		        	
 		        	for(int temp_to_en = 0 ; temp_to_en<final_nodeids1.length; temp_to_en++)
 		        		{
-		        			visit.enqueue(Integer.parseInt(final_nodeids1[temp_to_en]));
-		        			//System.out.println(Integer.parseInt(final_nodeids1[temp_to_en]));
-		        		}
-		        		
-		        	
-		          	for(int temp_to_en = 0 ; temp_to_en<final_nodeids2.length; temp_to_en++)
+		        	for(int temp_to_en2 = 0 ; temp_to_en2<final_nodeids2.length; temp_to_en2++)
 		        		{
-		          			final_list.add(Integer.parseInt(final_nodeids2[temp_to_en]));
-		          			//System.out.println(Integer.parseInt(final_nodeids2[temp_to_en]));
-		        		} 	
-		        	// add all the nodes to the queue
-		        	
-		        	// Algorithm to do BSF over the graph
-		        	recurseBFS(n1, n2, alreadyVisited,path);
+		        			recurseBFS(Integer.parseInt(final_nodeids1[temp_to_en]), Integer.parseInt(final_nodeids2[temp_to_en2]), alreadyVisited,path);
+		        			path = new ArrayList<Integer>();
+		        			alreadyVisited = new ArrayList<Integer>();
+		        			
+		        		}
+		        	}
+
+		          	
 		        	
 		         }
 			}
@@ -369,37 +373,122 @@ public class MongoDB_Play {
             	linker.put(node1,(ArrayList<Integer>) temp);     
         	}
 	}
-        for (Integer i: linker.keySet())
-        {
-        	System.out.println( " Node "+ i + " -------> " + linker.get(i).toString());
-        }
+//        for (Integer i: linker.keySet())
+//        {
+//        	System.out.println( " Node "+ i + " -------> " + linker.get(i).toString());
+//        }
 	}
 	
+	String mapIDtoDocName(int nodeId)
+	{
+		try
+		{
+	         MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
+	         DB db = mongoClient.getDB( "test" );
+	         DBCollection collection = db.getCollection("ext_table"); 
+	         DBCursor cursor = collection.find(new BasicDBObject("_id", nodeId));
+	        
+         	DBObject o_temp1 = cursor.next();
+             String doc_name = (String) o_temp1.get("doc_name");
+             return doc_name;
+		}
+		catch(Exception e)
+		{
+			return null;
+			// Do nothing
+		}
+	}
+//	
 	public static void main(String args[]) throws UnknownHostException
 	{
 		MongoDB_Play m = new MongoDB_Play();
-		m.mongo_store(1, "chirag", "shah", 1, "name", "type");
-		m.mongo_store(2, "samarth", "shah", 3, "name", "type");
-		m.mongo_store(3, "akshay", "shah", 3, "name", "type");
-		m.mongo_store(4, "shah", "praladh", 3, "name", "type");
-		m.mongo_store(5, "chirag", "pandey", 3, "name", "type");
-		m.mongo_inv_store("chirag", 1);
-		m.mongo_inv_store("shah", 1);
-		m.mongo_inv_store("samarth", 2);
-		m.mongo_inv_store("shah", 2);
-		m.mongo_inv_store("akshay", 3);
-		m.mongo_inv_store("shah", 3);
-		m.mongo_inv_store("shah", 4);
-		m.mongo_inv_store("praladh", 4);
-		m.mongo_inv_store("chirag", 5);
-		m.mongo_inv_store("pandey", 5);
-		m.make_linker();
-		m.resolveQuery("samarth pandey");
-		if(final_paths_ret!=null)
+////		m.mongo_store(1, "chirag", "shah", 1, "name", "type");
+////		m.mongo_store(2, "samarth", "shah", 3, "name", "type");
+////		m.mongo_store(3, "akshay", "shah", 3, "name", "type");
+////		m.mongo_store(4, "shah", "praladh", 3, "name", "type");
+////		m.mongo_store(5, "chirag", "pandey", 3, "name", "type");
+////		m.mongo_store(6, "india", "mumbai", 1, "name", "type");
+////		m.mongo_store(7, "karnataka", "bangalore", 3, "name", "type");
+////		m.mongo_store(8, "shah", "india", 3, "name", "type");
+////		m.mongo_store(9, "akshay", "bangalore", 3, "name", "type");
+////		m.mongo_store(10, "samarth", "pandey", 3, "name", "type");
+//		m.make_linker();
+		TreeMap<Integer,ArrayList<String>> tm = new TreeMap<>();
+		if(args.length == 1)
+		{
+			m.resolveQuery(args[0]);
+		}
+		else if(args.length == 2)
+		{
+			m.resolveQuery(args[0]+" "+args[1]);
+		}
+		
+		//m.resolveQuery("Stanford Boon");
+		
+		ArrayList<ArrayList<String>> final_doc_connections = new ArrayList<>();
+		
+		ArrayList<String> doc_single_conn = new ArrayList<>();
+		
+		ArrayList<String> list_docs = new ArrayList<>();
+		if(final_paths_ret!=null && final_paths_ret.size() >0)
 		{
 			for(ArrayList<Integer> i : final_paths_ret)
-			System.out.println("Final path of nodes covered" + i.toString());
+			{
+				//System.out.println("Final path of nodes covered" + i.toString());
+				int path_len = 0;
+				for(Integer a: i)
+				{
+					String retval = m.mapIDtoDocName(a);
+					if(retval!=null)
+					{
+						retval = retval + "_" +  a.toString();
+						list_docs.add(retval);
+					}
+					path_len++;
+				}
+				//System.out.println(list_docs.toString());
+				tm.put(path_len, list_docs);
+				final_doc_connections.add(list_docs);
+				list_docs = new ArrayList<>();
+				
+			}
+			
+			//print the paths in sorted order
+			int show_count = 0;
+			for(Integer i: tm.keySet() )
+			{
+				if(show_count == 6)
+					
+				{
+					break;
+				}
+				System.out.println(tm.get(i));
+				show_count++;
+			}
+				
+			
+
 		}
+		else if(final_single!=null && final_single.size()>0)
+		{
+			for(ArrayList<Integer> i : final_single)
+			{
+				for(Integer a: i)
+				{
+					String retval = m.mapIDtoDocName(a);
+					if(retval!=null)
+					{
+						retval = retval + "_" + a.toString();
+						doc_single_conn.add(retval);
+					}
+					
+				}
+				System.out.println("Final List for a single word query" + doc_single_conn.toString());
+				
+			}
+			//System.out.println("Node ID's with this query" + i.toString());
+		}
+
 	}
 }
 
