@@ -3,6 +3,12 @@ import com.sun.xml.internal.txw2.Document;
 
 import sun.misc.Queue;
 
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +17,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Stack;
 import java.util.TreeMap;
+
+import javax.imageio.ImageIO;
 
 
 public class MongoDB_Play {
@@ -39,6 +47,7 @@ public class MongoDB_Play {
 	         mongo_inv_store(key, node_id);
 	         mongo_inv_store(value, node_id);
 	         System.out.println("Done");
+	         mongoClient.close();
 				
 	      }catch(Exception e){
 	    	  System.out.println("Already added node id: " + node_id);
@@ -81,7 +90,7 @@ public class MongoDB_Play {
 		         collection.insert(document);
 		         System.out.println("Appended");
 	         }
-
+	         mongoClient.close();
 				
 	      }catch(Exception e){
 	         System.err.println( e.getClass().getName() + ": " + e.getMessage() );
@@ -110,6 +119,7 @@ public class MongoDB_Play {
 	         
 	         db.getCollection("linker_table").insert(document);
 	         //System.out.println("Done");
+	         mongoClient.close();
 				
 	      }catch(Exception e){
 	    	  System.out.println("Exception");
@@ -179,6 +189,7 @@ public class MongoDB_Play {
 		                	store_linker(main_id,node_id_key, 1);
 	                }
 	         }
+	         mongoClient.close();
 	         
 		}
 		catch(Exception e)
@@ -291,6 +302,7 @@ public class MongoDB_Play {
 		         if(cursor1.size() == 0 || cursor2.size() ==0)
 		         {
 		        	 System.out.println("No relation between the entered stuff");
+		        	 System.exit(0);
 		        	 return;
 		         }
 		         else if(cursor1.size() > 0 && cursor1.size() > 0)
@@ -323,6 +335,7 @@ public class MongoDB_Play {
 		        	for(int temp_to_en2 = 0 ; temp_to_en2<final_nodeids2.length; temp_to_en2++)
 		        		{
 		        			recurseBFS(Integer.parseInt(final_nodeids1[temp_to_en]), Integer.parseInt(final_nodeids2[temp_to_en2]), alreadyVisited,path);
+		        			//System.out.println("here");
 		        			path = new ArrayList<Integer>();
 		        			alreadyVisited = new ArrayList<Integer>();
 		        			
@@ -391,6 +404,7 @@ public class MongoDB_Play {
 	        
          	DBObject o_temp1 = cursor.next();
              String doc_name = (String) o_temp1.get("doc_name");
+             mongoClient.close();
              return doc_name;
 		}
 		catch(Exception e)
@@ -432,7 +446,7 @@ public class MongoDB_Play {
 	}
 	
 //	
-	public static void main(String args[]) throws UnknownHostException
+	public static void main(String args[]) throws IOException
 	{
 		MongoDB_Play m = new MongoDB_Play();
 ////		m.mongo_store(1, "chirag", "shah", 1, "name", "type");
@@ -445,136 +459,195 @@ public class MongoDB_Play {
 ////		m.mongo_store(8, "shah", "india", 3, "name", "type");
 ////		m.mongo_store(9, "akshay", "bangalore", 3, "name", "type");
 ////		m.mongo_store(10, "samarth", "pandey", 3, "name", "type");
-//		m.make_linker();
-		TreeMap<Integer,ArrayList<String>> tm = new TreeMap<>();
-		String permission = "root";
-		if(args.length == 2) // for 1 word query -- word permission
-		{
-			m.resolveQuery(args[0]);
-			permission = args[1];
-			
-		}
-		else if(args.length == 3) // for 2 word query -- word word word_permission
-		{
-			m.resolveQuery(args[0]+" "+args[1]);
-			permission = args[2];
-		}
-		
-		m.resolveQuery("Stanford Boon");
-		
-	//	String user_email_id = args[2];
-		
-		
-		
-		//ArrayList<ArrayList<String>> final_doc_connections = new ArrayList<>();
-		
-		ArrayList<String> doc_single_conn = new ArrayList<>();
-		
-		ArrayList<String> list_docs = new ArrayList<>();
-		if(final_paths_ret!=null && final_paths_ret.size() >0)
-		{
-			for(ArrayList<Integer> i : final_paths_ret)
-			{
-				//System.out.println("Final path of nodes covered" + i.toString());
-				int path_len = 0;
-				for(Integer a: i)
-				{
-					String retval = m.mapIDtoDocName(a);
-					if(retval!=null)
-					{
-						retval = retval + "_" +  a.toString();
-						list_docs.add(retval);
-					}
-					path_len++;
-				}
-				//System.out.println(list_docs.toString());
-				
-				// put into the tree map according to the permissions
-				if(permission.equals("root"))
-				{	
-				tm.put(path_len, list_docs);
-				//final_doc_connections.add(list_docs);
-				list_docs = new ArrayList<>();
-				}
-				else
-				{
-					boolean add_flag = true;
-					// only add this if the path does not contain any pdf and csv
-					for(String filter: list_docs)
-					{
-						//System.out.println(filter + "-- > " + filter.contains("."));
-						if(filter.contains(".") == false) // Implies professors and 
-						{
-							add_flag = false;
-							break;
-						}
-					}
-					//System.out.println("Done");
-					if(add_flag == true)   // Only add to this if the the user is permitted to view stuff
-					{
-						tm.put(path_len, list_docs);
-						//final_doc_connections.add(list_docs);
-						//list_docs = new ArrayList<>();
-					}
-					list_docs = new ArrayList<>();
-					
-				}
-			}
-			
-			//print the paths in sorted order
-			LinkedHashMap<String, ArrayList<String>> toSendDraw = new LinkedHashMap<>();
-			int show_count = 0;
-			
-			if(tm.keySet().size() == 0)
-			{
-				System.out.println("No relevant data found -- Increase permission level");
-			}
-			
-			for(Integer i: tm.keySet() )
-			{
-				if(show_count == 6)
-					
-				{
-					break;
-				}
-				ArrayList<String> temp_list_fp = tm.get(i);
-				
-				for(String i_i : temp_list_fp )
-				{
-					//System.out.println(i_i);
-					String spl[] = i_i.split("_");
-					int node_id_forn = Integer.parseInt(spl[1]);
-					toSendDraw.put(i_i, m.getNeighBoursOf(node_id_forn)) ;
-				}
-				// Send this to Prahladh's draw function
-				
-				
-				System.out.println(tm.get(i));
-				show_count++;
-			}
-				
-			
-
-		}
-		else if(final_single!=null && final_single.size()>0)
-		{
-			for(ArrayList<Integer> i : final_single)
-			{
-				for(Integer a: i)
-				{
-					String retval = m.mapIDtoDocName(a);
-					if(retval!=null)
-					{
-						retval = retval + "_" + a.toString();
-						doc_single_conn.add(retval);
-					}
-					
-				}
-				System.out.println("Final List for a single word query" + doc_single_conn.toString());
-				
-			}
-			//System.out.println("Node ID's with this query" + i.toString());
-		}
+			m.make_linker();
+//		TreeMap<Integer,ArrayList<String>> tm = new TreeMap<>();
+//		String permission = "base";
+//		
+//		
+//		if(args.length == 2) // for 1 word query -- word permission
+//		{
+//			m.resolveQuery(args[0]);
+//			permission = args[1];
+//			
+//		}
+//		else if(args.length == 3) // for 2 word query -- word word word_permission
+//		{
+//			m.resolveQuery(args[0] + " " + args[1]);
+//			permission = args[2];
+//		}
+//		
+//		//m.resolveQuery("Zachary IBM");
+//
+//		
+//	//	String user_email_id = args[2];
+//		
+//		
+//		
+//		//ArrayList<ArrayList<String>> final_doc_connections = new ArrayList<>();
+//		boolean first_time = true;
+//		ArrayList<String> doc_single_conn = new ArrayList<>();
+//		
+//		ArrayList<String> list_docs = new ArrayList<>();
+//
+//		if(final_paths_ret!=null && final_paths_ret.size() >0)
+//		{
+//			for(ArrayList<Integer> i : final_paths_ret)
+//			{
+//				
+//				//System.out.println("Final path of nodes covered" + i.toString());
+//				int path_len = 0;
+//				for(Integer a: i)
+//				{
+//					//System.out.println("----------" + check++);
+//					String retval = m.mapIDtoDocName(a);
+//					//System.out.println("XXXXXXXXXX" + check++);
+//					if(retval!=null)
+//					{
+//						retval = retval + "_" +  a.toString();
+//						list_docs.add(retval);
+//					}
+//					path_len++;
+//				}
+//				//System.out.println(list_docs.toString());
+//				
+//				// put into the tree map according to the permissions
+//				if(permission.equals("root"))
+//				{	
+//				tm.put(path_len, list_docs);
+//				//final_doc_connections.add(list_docs);
+//				list_docs = new ArrayList<>();
+//
+//				}
+//				else
+//				{
+//					boolean add_flag = true;
+//					// only add this if the path does not contain any pdf and csv
+//					for(String filter: list_docs)
+//					{
+//						//System.out.println(filter + "-- > " + filter.contains("."));
+//						if(filter.contains(".") == false) //implies pdf and csv
+//						{
+//							add_flag = false;
+//							break;
+//						}
+//					}
+//					//System.out.println("Done");
+//					if(add_flag == true)   // Only add to this if the the user is permitted to view stuff
+//					{
+//						tm.put(path_len, list_docs);
+//						//final_doc_connections.add(list_docs);
+//						//list_docs = new ArrayList<>();
+//					}
+//					list_docs = new ArrayList<>();
+//
+//				}
+//			}
+//			
+//			//System.out.println("here");
+//			//print the paths in sorted order
+//			LinkedHashMap<String, ArrayList<String>> toSendDraw = new LinkedHashMap<>();
+//			int show_count = 0;
+//			
+//			if(tm.keySet().size() == 0)
+//			{
+//				System.out.println("No relation between the entered stuff");
+//				System.exit(0);
+//			}
+//			
+//			for(Integer i: tm.keySet() )
+//			{
+//				if(show_count == 6)
+//					
+//				{
+//					break;
+//				}
+//				ArrayList<String> temp_list_fp = tm.get(i);
+//				
+//				for(String i_i : temp_list_fp )
+//				{
+//					//System.out.println(i_i);
+//					String spl[] = i_i.split("_");
+//					int node_id_forn = Integer.parseInt(spl[1]);
+//					toSendDraw.put(i_i, m.getNeighBoursOf(node_id_forn)) ;
+//				}
+//				// Send this to Prahladh's draw function
+//				
+//				if(first_time == true)
+//				{
+//			        Graph graphdraw = new Graph("Output");
+//
+//			        graphdraw.setSize(2000,2000);
+//			        
+//			        graphdraw.setVisible(true);
+//			        
+//					GraphDrawTest.fetchData(graphdraw, toSendDraw);
+//					 BufferedImage bImg = new BufferedImage(graphdraw.getWidth(), graphdraw.getHeight(), BufferedImage.TYPE_INT_RGB);
+//					    Graphics2D cg = bImg.createGraphics();
+//					    graphdraw.paintAll(cg);
+//					    try {
+//					            if (ImageIO.write(bImg, "png", new File("./output_image.png")))
+//					            {
+//					                //System.out.println("-- saved");
+//					            }
+//					    } catch (IOException e) {
+//					            // TODO Auto-generated catch block
+//					            e.printStackTrace();
+//					    }
+//					    
+//				        graphdraw.setVisible(false);
+//					    
+//					    
+//					    first_time = false;
+//				
+//				}
+//
+//				
+//				System.out.println(tm.get(i));
+//				show_count++;
+//			}
+//				
+//			
+//			System.exit(0);
+//		}
+//		else if(final_single!=null && final_single.size()>0)
+//		{
+//			for(ArrayList<Integer> i : final_single)
+//			{
+//				for(Integer a: i)
+//				{
+//					String retval = m.mapIDtoDocName(a);
+//					if(retval!=null)
+//					{
+//						if( permission.equals("base") )
+//						{
+//							if(retval.contains(".") == true)
+//							{
+//								retval = retval + "_" + a.toString();
+//								doc_single_conn.add(retval);
+//							}
+//
+//						}
+//						else
+//						{
+//							retval = retval + "_" + a.toString();
+//							doc_single_conn.add(retval);
+//						}
+//
+//						
+//					}
+//					
+//				}
+//				System.out.println("Final List for a single word query" + doc_single_conn.toString());
+//				
+//			}
+//			//System.out.println("Node ID's with this query" + i.toString());
+//			System.exit(0);
+//		}
+//		else
+//		{
+//			System.out.println("No relation between the entered stuff");
+//			System.exit(0);
+//		}
 
 	}
 }

@@ -1,6 +1,10 @@
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 
@@ -24,14 +28,15 @@ class GraphDrawTest
         map.put("123456xxxxxxxxxx", new ArrayList<String>(Arrays.asList("31", "32", "33", "34", "35")));
 
         fetchData(graphdraw, map);
+        
     }
 
     static void fetchData(Graph graphdraw, LinkedHashMap<String, ArrayList<String>> map)
     {
         Set set = map.entrySet();
         Iterator i = set.iterator();
-        int width = 100;
-        int height = 100;
+        int width = 150;
+        int height = 150;
         int ii = 0;
 
         while(i.hasNext())
@@ -52,7 +57,7 @@ class GraphDrawTest
         }
 
         int jj = 0, iter;
-        width = 100; height = 100;
+        width = 150; height = 150;
         ArrayList<String> list;
 
         for(String key : map.keySet())
