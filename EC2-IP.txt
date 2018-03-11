@@ -1,2 +1,0 @@
-Public DNS: 
-ec2-52-91-214-232.compute-1.amazonaws.com
